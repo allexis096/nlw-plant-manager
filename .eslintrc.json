@@ -17,6 +17,12 @@
     "react/jsx-filename-extension": "off",
     "react/style-prop-object": "off",
     "react/prop-types": "off",
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "object-curly-newline": "off",
+    "react/jsx-props-no-spreading": "off"
   }
 }
