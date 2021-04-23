@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/core';
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
@@ -10,6 +11,7 @@ import { EnvironmentButton } from '../components/EnvironmentButton';
 import { Header } from '../components/Header';
 import { Load } from '../components/Load';
 import { PlantCardPrimary } from '../components/PlantCardPrimary';
+import { PlantProps } from '../libs/storage';
 import { api } from '../services/api';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
@@ -19,23 +21,11 @@ type Environment = {
   title: string;
 };
 
-type Plant = {
-  id: number;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
-};
-
 export function PlantSelect() {
+  const navigation = useNavigation();
   const [environments, setEnvironments] = useState<Environment[]>([]);
-  const [plants, setPlants] = useState<Plant[]>([]);
-  const [filteredPlants, setFilteredPlants] = useState<Plant[]>([]);
+  const [plants, setPlants] = useState<PlantProps[]>([]);
+  const [filteredPlants, setFilteredPlants] = useState<PlantProps[]>([]);
   const [environmentSelected, setEnvironmentSelected] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +44,10 @@ export function PlantSelect() {
     );
 
     return setFilteredPlants(filtered);
+  }
+
+  function handlePlantSelect(plant: PlantProps) {
+    navigation.navigate('PlantSave', { plant });
   }
 
   async function fetchPlants() {
@@ -141,7 +135,11 @@ export function PlantSelect() {
           showsHorizontalScrollIndicator={false}
           numColumns={2}
           renderItem={({ item }) => (
-            <PlantCardPrimary key={item.id} data={item} />
+            <PlantCardPrimary
+              key={item.id}
+              data={item}
+              onPress={() => handlePlantSelect(item)}
+            />
           )}
           onEndReachedThreshold={0.1}
           onEndReached={({ distanceFromEnd }) =>
@@ -181,8 +179,9 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     paddingBottom: 5,
-    marginLeft: 32,
     marginVertical: 32,
+    marginLeft: 32,
+    paddingRight: 32,
   },
   plants: {
     flex: 1,
