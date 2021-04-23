@@ -1,18 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View, FlatList } from 'react-native';
+import { Image, StyleSheet, Text, View, FlatList, Alert } from 'react-native';
 import { formatDistance } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Header } from '../components/Header';
 import waterdropImg from '../assets/waterdrop.png';
 import colors from '../styles/colors';
-import { loadPlant, PlantProps } from '../libs/storage';
+import { loadPlant, PlantProps, removePlant } from '../libs/storage';
 import fonts from '../styles/fonts';
 import { PlantCardSecondary } from '../components/PlantCardSeconday';
+import { Load } from '../components/Load';
 
 export function MyPlants() {
   const [myPlants, setMyPlants] = useState<PlantProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [nextWaterd, setNextWaterd] = useState<string>();
+
+  function handleRemove(plant: PlantProps) {
+    Alert.alert('Remover', `Deseja remover a ${plant.name}?`, [
+      {
+        text: 'Não 🙏',
+        style: 'cancel',
+      },
+      {
+        text: 'Sim 😢',
+        onPress: async () => {
+          try {
+            await removePlant(plant.id);
+
+            setMyPlants((prev) => prev.filter((item) => item.id !== plant.id));
+          } catch {
+            Alert.alert('Não foi possível remover! 😢');
+          }
+        },
+      },
+    ]);
+  }
 
   useEffect(() => {
     (async () => {
@@ -33,6 +55,10 @@ export function MyPlants() {
     })();
   }, []);
 
+  if (loading) {
+    return <Load />;
+  }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -47,7 +73,12 @@ export function MyPlants() {
         <FlatList
           data={myPlants}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <PlantCardSecondary data={item} />}
+          renderItem={({ item }) => (
+            <PlantCardSecondary
+              data={item}
+              handleRemove={() => handleRemove(item)}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flex: 1 }}
         />
@@ -62,7 +93,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 30,
-    paddingTop: 50,
     backgroundColor: colors.background,
   },
   spotlight: {
